@@ -62,7 +62,7 @@ def create_app(config_class=Config):
 
     # Import and register the blueprints
     from app.routes import filemanager_bp
-    app.register_blueprint(filemanager_bp)
+    app.register_blueprint(filemanager_bp, url_prefix='/api/v1/filemanager')
     @app.get('/')
     def index():
         return jsonify({'status': 'service is running'}), 200

@@ -1,12 +1,12 @@
+# routes/filemanager.py
+from flask import Blueprint, request, jsonify, current_app
 from http import HTTPStatus
 
-from flask import Blueprint, jsonify,request
+from numpy.f2py.auxfuncs import throw_error
 
-from app.services.filemanager import get_file_list
+from app.services.filemanager import FileManagerService
 
-filemanager_bp = Blueprint('filemanager', __name__, url_prefix='/filemanager')
-from app.models.filemanager import FileManager
-from app import db
+filemanager_bp = Blueprint('filemanager', __name__)
 
 @filemanager_bp.route('/', methods=['GET'])
 def get_filemanager():
@@ -41,6 +41,9 @@ def get_filemanager():
         per_page = request.args.get('per_page', 10, type=int)
         search = request.args.get('search', None, type=str)
 
+        # test error handling
+        raise TypeError("This is a test error")
+
         # Validate pagination parameters
         if page < 1:
             return jsonify({'error': 'Page number must be greater than 0'}), HTTPStatus.BAD_REQUEST
@@ -48,7 +51,7 @@ def get_filemanager():
             return jsonify({'error': 'Per page must be between 1 and 100'}), HTTPStatus.BAD_REQUEST
 
         # Get file list from service
-        result = get_file_list(search=search, page=page, per_page=per_page)
+        result = FileManagerService.get_file_list(search=search, page=page, per_page=per_page)
 
         # Return response
         return jsonify({
@@ -78,13 +81,50 @@ def validate_name():
             description: Name is invalid
     """
     try:
-        name = request.json['name']
-        is_valid = validate_name(name)
+        name = request.json.get('name')
+        if not name:
+            return jsonify({'status': 'error', 'message': 'Name is required'}), HTTPStatus.BAD_REQUEST
+
+        is_valid = FileManagerService.validate_name(name)
         if is_valid:
             return jsonify({'status': 'success', 'message': 'Name is valid'}), HTTPStatus.OK
-        else:
-            return jsonify({'status': 'error', 'message': 'Name is invalid'}), HTTPStatus.BAD_REQUEST
+
+        return jsonify({'status': 'error', 'message': 'Name is invalid'}), HTTPStatus.BAD_REQUEST
     except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)}), HTTPStatus.INTERNAL_SERVER_ERROR
+        current_app.logger.error(f"Error in validate_name: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), HTTPStatus.INTERNAL_SERVER_ERROR
 
 
+# Base image directory
+IMAGE_DIR = "public/images/"
+size_map = {
+    'thumbnail': (150, 100),
+    'small': (300, 200),
+    'large': (600, 400),
+}
+
+@filemanager_bp.route('/upload-chunk-model', methods=['POST'])
+def upload_chunk_model():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+    try:
+        file = request.files['file']
+        data = {
+            'name': request.form.get('name'),
+            'chunk_number': int(request.form.get('chunk_number', 0)),
+            'total_chunks': int(request.form.get('total_chunks', 1)),
+            'description': request.form.get('description', ''),
+            'filename': request.form.get('filename', 'uploaded_file'),
+            'file_type': request.form.get('file_type', 'cls'),
+            'id': request.form.get('id', 0),
+            'image': request.files.get('image')
+        }
+        result, status_code = FileManagerService.handle_chunk_upload(file, data)
+        return jsonify(result), status_code
+
+    except Exception as e:
+        current_app.logger.error(f"Error in upload_chunk_model: {str(e)}")
+        return jsonify({"error": str(e)}), HTTPStatus.INTERNAL_SERVER_ERROR
