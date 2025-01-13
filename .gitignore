@@ -23,3 +23,6 @@ logs/
 __pycache__/
 .idea
 migrations/
+data/
+pgadmin/
+servers.json/
