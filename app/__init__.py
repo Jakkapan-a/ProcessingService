@@ -52,13 +52,13 @@ def create_app(config_class=Config):
         message = f'Handling request: {request.method} {request.url}'
         app.logger.info(message)
 
-        try:
-            body = request.get_data(as_text=True)
-            if body:
-                app.logger.info(f'Body: {body}')
-
-        except Exception as e:
-            app.logger.error(f'Error parsing JSON: {e}')
+        # try:
+        #     body = request.get_data(as_text=True)
+        #     if body:
+        #         app.logger.info(f'Body: {body}')
+        #
+        # except Exception as e:
+        #     app.logger.error(f'Error parsing JSON: {e}')
 
     # Import and register the blueprints
     from app.routes import filemanager_bp

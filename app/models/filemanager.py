@@ -13,6 +13,7 @@ class FileManager(db.Model):
     filename = db.Column(db.String(255), nullable=False)
     image_name = db.Column(db.String(255), nullable=True)
     description = db.Column(db.String(255), nullable=True)
+    file_type = db.Column(db.String(255), nullable=True)
 
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     updated_at = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())

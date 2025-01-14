@@ -10,7 +10,7 @@ def test_server_is_up_and_running(client):
 
 def test_get_filemanager(client):
     """Test get file manager entries"""
-    response = client.get('/filemanager/')
+    response = client.get('api/v1/filemanager/')
     assert response.status_code == HTTPStatus.OK
     data = response.get_json()
     assert data['status'] == 'success'
@@ -19,7 +19,7 @@ def test_get_filemanager(client):
 
 def test_get_filemanager_pagination(client):
     """Test get file manager entries with pagination"""
-    response = client.get('/filemanager/?page=1&per_page=1')
+    response = client.get('/api/v1/filemanager/?page=1&per_page=1')
     assert response.status_code == HTTPStatus.OK
     data = response.get_json()
     assert data['status'] == 'success'

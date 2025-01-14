@@ -34,7 +34,6 @@ def get_filemanager():
         400:
             description: Invalid parameters
     """
-
     try:
         # Get and validate query parameters
         page = request.args.get('page', 1, type=int)
@@ -42,7 +41,7 @@ def get_filemanager():
         search = request.args.get('search', None, type=str)
 
         # test error handling
-        raise TypeError("This is a test error")
+        # raise TypeError("This is a test error")
 
         # Validate pagination parameters
         if page < 1:
@@ -81,15 +80,21 @@ def validate_name():
             description: Name is invalid
     """
     try:
-        name = request.json.get('name')
+        name = request.form.get('name') if request.form else request.json.get('name')
+        _id = request.form.get('id') if request.form else request.json.get('id', 0)
         if not name:
-            return jsonify({'status': 'error', 'message': 'Name is required'}), HTTPStatus.BAD_REQUEST
+            return jsonify({'status': 'error', 'message': 'Name is required','is_valid': False}), HTTPStatus.BAD_REQUEST
 
-        is_valid = FileManagerService.validate_name(name)
+        try:
+            _id = int(_id) if _id else 0
+        except ValueError:
+            _id = 0
+
+        is_valid = FileManagerService.validate_name(name, _id)
         if is_valid:
-            return jsonify({'status': 'success', 'message': 'Name is valid'}), HTTPStatus.OK
+            return jsonify({'status': 'success', 'message': 'Name is valid','is_valid': True}), HTTPStatus.OK
 
-        return jsonify({'status': 'error', 'message': 'Name is invalid'}), HTTPStatus.BAD_REQUEST
+        return jsonify({'status': 'error', 'message': 'Name is invalid','is_valid': False}), HTTPStatus.OK
     except Exception as e:
         current_app.logger.error(f"Error in validate_name: {str(e)}")
         return jsonify({
@@ -123,8 +128,58 @@ def upload_chunk_model():
             'image': request.files.get('image')
         }
         result, status_code = FileManagerService.handle_chunk_upload(file, data)
+
         return jsonify(result), status_code
 
     except Exception as e:
         current_app.logger.error(f"Error in upload_chunk_model: {str(e)}")
         return jsonify({"error": str(e)}), HTTPStatus.INTERNAL_SERVER_ERROR
+
+@filemanager_bp.route('/update-info', methods=['POST'])
+def update_info():
+    """
+    Update file manager entry
+    """
+    try:
+        #  JSON และ form-data
+        data = request.form.to_dict() if request.form else request.json
+
+        if not data:
+            return jsonify({
+                'status': 'error',
+                'message': 'No data provided'
+            }), HTTPStatus.BAD_REQUEST
+
+        result = FileManagerService.update_info(data)
+        return jsonify(result), HTTPStatus.OK
+
+    except Exception as e:
+        current_app.logger.error(f"Error in update_info: {str(e)}")
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), HTTPStatus.INTERNAL_SERVER_ERROR
+
+@filemanager_bp.route('/delete', methods=['POST'])
+def delete_file():
+    """
+    Delete file manager entry
+    """
+    try:
+        data = request.form.to_dict() if request.form else request.json
+
+        if not data:
+            return jsonify({
+                'status': 'error',
+                'message': 'No data provided'
+            }), HTTPStatus.BAD_REQUEST
+
+        result = FileManagerService.delete_file(data)
+        return jsonify(result), HTTPStatus.OK
+
+    except Exception as e:
+        current_app.logger.error(f"Error in delete_file: {str(e)}")
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), HTTPStatus.INTERNAL_SERVER_ERROR

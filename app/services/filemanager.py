@@ -58,16 +58,23 @@ class FileManagerService:
         }
 
     @staticmethod
-    def validate_name(name):
+    def validate_name(_name, _id =0):
         """
-        Validate file name
-        :param name:
+        Validate file _name
+        :param _name:
+        :param _id: default 0
         :return:
         """
-        if not name or len(name) > 255:
+        if not _name or len(_name) > 255:
             return False
 
-        existing = FileManager.query.filter(FileManager.name == name).first()
+        if _id > 0:
+            query = FileManager.query.filter(FileManager.name == _name, FileManager.id != _id)
+        else:
+            query = FileManager.query.filter(FileManager.name == _name)
+
+        existing = query.first()
+        # return True if name is valid (not exists)
         return existing is None
 
     @staticmethod
@@ -107,45 +114,70 @@ class FileManagerService:
     def _process_final_chunk(file, data, extension):
         """
         Process final chunk
-        :param file:
-        :param data:
-        :param extension:
-        :return:
+        :param file: อัพโหลดไฟล์
+        :param data: ข้อมูลที่เกี่ยวข้อง
+        :param extension: นามสกุลไฟล์
+        :return: tuple ของ response data และ status code
         """
-        path_models = os.path.join('models', data['file_type'])
-        new_filename = FileManagerService._merge_chunks(
-            data['filename'],
-            data['total_chunks'],
-            data['file_type'],
-            extension
-        )
-
-        #
-        image = data.get('image')
-        image_filename = FileManagerService._save_image(image) if image else ""
-
-        # save file record
-        if data.get('id'):
-            file_manager = FileManager.query.get(data['id'])
-            if not file_manager:
-                raise Exception("Data not found for update")
-
-            file_manager.name = data['name']
-            file_manager.description = data['description']
-            file_manager.filename = new_filename
-            file_manager.image_name = image_filename
-
-            file_manager.updated_at = db.func.now()
-            file_manager.save()
-        else:
-
-            file_manager = FileManager(
-                name=data['name'],
-                description=data['description'],
-                filename=new_filename,
-                image_name=image_filename
+        try:
+            path_models = os.path.join('models', data['file_type'])
+            new_filename = FileManagerService._merge_chunks(
+                data['filename'],
+                data['total_chunks'],
+                data['file_type'],
+                extension
             )
-            file_manager.save()
+
+            # save image file
+            image = data.get('image')
+            image_filename = FileManagerService._save_image(image) if image else ""
+
+            # if data['id'] is provided, update existing record
+            if data.get('id'):
+                file_manager = FileManager.query.get(data['id'])
+                if not file_manager:
+                    raise Exception("Data not found for update")
+
+                # update existing record
+                file_manager.name = data['name']
+                file_manager.description = data['description']
+                file_manager.filename = new_filename
+                file_manager.image_name = image_filename
+                file_manager.file_type = data['file_type']
+                file_manager.updated_at = db.func.now()
+
+                db.session.commit()
+
+                return {
+                    "message": "File updated successfully",
+                    "filename": file_manager.to_dict(),
+                    "type": "model",
+                    "image_url": f"/images/{image_filename}" if image_filename else None
+                }, 200
+            else:
+                # Add new record
+                file_manager = FileManager(
+                    name=data['name'],
+                    description=data['description'],
+                    filename=new_filename,
+                    image_name=image_filename,
+                    file_type=data['file_type']
+                )
+
+                db.session.add(file_manager)
+                db.session.commit()
+
+                return {
+                    "message": "File uploaded successfully",
+                    "filename": file_manager.to_dict(),
+                    "type": "model",
+                    "image_url": f"/images/{image_filename}" if image_filename else None
+                }, 201
+
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Error processing final chunk: {str(e)}")
+            raise
 
     @staticmethod
     def _merge_chunks(filename, total_chunks, file_type, extension):
@@ -214,3 +246,92 @@ class FileManagerService:
         except Exception as e:
             current_app.logger.error(f"Error deleting image: {str(e)}")
             raise
+
+    @staticmethod
+    def update_info(data):
+        """
+        Update file information
+
+        Args:
+            data (dict): data for update
+
+        Returns:
+            dict: updated file information
+
+        Raises:
+            ValueError: if name is not provided
+        """
+        try:
+            # Validate input
+            if not data.get('name'):
+                raise ValueError("Name is required")
+
+            _id = int(data.get('id', 0))
+            if _id <= 0:
+                raise ValueError("Invalid ID")
+
+            # Get file manager
+            file_manager = FileManager.query.get(_id)
+            if not file_manager:
+                raise ValueError("File not found")
+
+            print(data)
+            # Update fields
+            file_manager.name = data.get('name')
+            file_manager.description = data.get('description', '')
+
+            # Save changes
+            db.session.commit()
+
+            return {
+                'status': 'success',
+                'message': 'File information updated successfully',
+                'data': file_manager.to_dict()
+            }
+
+        except ValueError as e:
+            raise e
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Error in update_info: {str(e)}")
+            raise Exception(f"Failed to update file information: {str(e)}")
+
+    @staticmethod
+    def delete_file(data):
+        """
+        Delete file manager entry
+        :param data:
+        :return: dict
+        """
+        try:
+            _id = int(data.get('id', 0))
+            if _id <= 0:
+                raise ValueError("Invalid ID")
+
+            file_manager = FileManager.query.get(_id)
+            if not file_manager:
+                raise ValueError("File not found")
+            # Delete files
+            FileManagerService.delete_image(file_manager.image_name)
+
+            file_type = file_manager.file_type if file_manager.file_type else 'cls'
+            path_models = os.path.join('models', file_type)
+
+            path = os.path.join(path_models, file_manager.filename)
+            if os.path.exists(path):
+                os.remove(path)
+                current_app.logger.info(f"Removed model file: { file_manager.filename }")
+
+            db.session.delete(file_manager)
+            db.session.commit()
+
+            return {
+                'status': 'success',
+                'message': 'File deleted successfully'
+            }
+
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Error in delete: {str(e)}")
+            raise Exception(f"Failed to delete file: {str(e)}")
+
