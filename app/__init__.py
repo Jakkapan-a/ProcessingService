@@ -61,8 +61,9 @@ def create_app(config_class=Config):
         #     app.logger.error(f'Error parsing JSON: {e}')
 
     # Import and register the blueprints
-    from app.routes import filemanager_bp
+    from app.routes import filemanager_bp, predict_bp
     app.register_blueprint(filemanager_bp, url_prefix='/api/v1/filemanager')
+    app.register_blueprint(predict_bp, url_prefix='/api/v1/predict')
     @app.get('/')
     def index():
         return jsonify({'status': 'service is running'}), 200

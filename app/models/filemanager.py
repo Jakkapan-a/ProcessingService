@@ -28,6 +28,7 @@ class FileManager(db.Model):
             'filename': self.filename,
             'image_name': self.image_name,
             'description': self.description,
+            'file_type': self.file_type,
             'created_at': self.created_at,
             'updated_at': self.updated_at
         }
