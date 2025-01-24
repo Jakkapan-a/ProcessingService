@@ -9,6 +9,9 @@ from app import db
 from app.models.filemanager import FileManager
 from werkzeug.utils import secure_filename
 
+from app.services.model_loader import clean_model_cache
+
+
 class FileManagerService:
     IMAGE_DIR = "public/images/"
     SIZE_MAP = {
@@ -394,7 +397,7 @@ class FileManagerService:
         detect_directory = os.path.join("models", "detect")
         current_app.logger.info("Clearing files in models/detect")
         clear_directory(detect_directory)
-
+        clean_model_cache(max_age_hours=1)
         return {
             'status': 'success',
             'message': 'All files deleted successfully'
