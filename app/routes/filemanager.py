@@ -5,6 +5,9 @@ from http import HTTPStatus
 from app.services.filemanager import FileManagerService
 filemanager_bp = Blueprint('filemanager', __name__)
 
+"""
+File manager routes
+"""
 @filemanager_bp.route('/', methods=['GET'])
 def get_filemanager():
     """
@@ -62,6 +65,40 @@ def get_filemanager():
             'message': str(e)
         }), HTTPStatus.INTERNAL_SERVER_ERROR
 
+@filemanager_bp.route('/<int:_id>/info', methods=['GET'])
+def get_file_info(_id):
+    """
+    Get file manager entry by id
+    ---
+    parameters:
+      - name: _id
+        in: path
+        type: integer
+        required: true
+        description: File manager entry id
+    responses:
+        200:
+            description: File manager entry info
+        400:
+            description: Invalid parameters
+    """
+    try:
+        # Get file info from service
+        result, status_code = FileManagerService.get_file_by_id(_id)
+
+        # Return response
+        return jsonify(result), status_code
+
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), HTTPStatus.INTERNAL_SERVER_ERROR
+
+
+"""
+Create file manager entry
+"""
 @filemanager_bp.route('/validate', methods=['POST'])
 def validate_name():
     """

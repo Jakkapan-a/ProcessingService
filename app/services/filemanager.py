@@ -1,6 +1,8 @@
 # services/filemanager.py
 import os
 import uuid
+from http import HTTPStatus
+
 from flask import current_app
 from sqlalchemy import or_
 from app import db
@@ -56,6 +58,26 @@ class FileManagerService:
                 'has_prev': page > 1
             }
         }
+
+    @staticmethod
+    def get_file_by_id(_id):
+        """
+        Get file by id
+        :param _id:
+        :return:
+        """
+        result = FileManager.query.get(_id)
+        if not result:
+            return {
+                'status': 'error',
+                'message': 'File not found'
+            }, HTTPStatus.NOT_FOUND
+
+        return {
+            'status': 'success',
+            'data': result.to_dict(),
+            'message': 'File retrieved successfully'
+        }, HTTPStatus.OK
 
     @staticmethod
     def validate_name(_name, _id =0):

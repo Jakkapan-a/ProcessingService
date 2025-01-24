@@ -38,6 +38,8 @@ class PredictService:
             path_model = "models/cls"
         elif file_manager.file_type == 'detect':
             path_model = "models/detect"
+        print("path_model", path_model)
+        print("file_manager.filename", file_manager.filename)
 
         model = get_model(file_manager.filename, path_model, file_manager.id)
 
@@ -51,7 +53,7 @@ class PredictService:
 
         processed_result = (PredictService.process_cls_result(result)
                             if file_manager.file_type == 'cls'
-                            else PredictService.process_cls_result(result))
+                            else PredictService.process_detect_result(result))
         clean_model_cache(max_age_hours=1)
 
         return {
@@ -66,21 +68,30 @@ class PredictService:
         Process the detection result
         """
         boxes = result[0].boxes
-        names = result[0].names  # Get class name mapping
+        names = result[0].names
 
-        # Convert class indices to names
-        class_names = [names[int(c)] for c in boxes.cls.tolist()]
+        detections = []
+        for i in range(len(boxes.xyxy)):
+            detections.append({
+                'box': boxes.xyxy[i].tolist(),
+                'confidence': float(boxes.conf[i]),
+                'class': int(boxes.cls[i]),
+                'name': names[int(boxes.cls[i])]
+            })
 
-        return {
-            'boxes': boxes.xyxy.tolist(),
-            'labels': boxes.get_field('labels').tolist(),
-            'conf': boxes.conf.tolist(),
-            'cls': boxes.cls.tolist()
-        }
+        return detections
 
     @staticmethod
     def process_cls_result(result):
-        return {
-            'class': int(result[0].probs.top1),
-            'confidence': float(result[0].probs.top1conf)
-        }
+        try:
+            probs = result[0].probs
+            return {
+                'class': int(probs.data.argmax()),
+                'confidence': float(probs.data.max()),
+                'class_name': probs.names[int(probs.data.argmax())]
+            }
+        except AttributeError:
+            return {
+                'class': None,
+                'confidence': None
+            }
