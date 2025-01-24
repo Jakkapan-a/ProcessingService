@@ -2,10 +2,7 @@
 from flask import Blueprint, request, jsonify, current_app
 from http import HTTPStatus
 
-from numpy.f2py.auxfuncs import throw_error
-
 from app.services.filemanager import FileManagerService
-
 filemanager_bp = Blueprint('filemanager', __name__)
 
 @filemanager_bp.route('/', methods=['GET'])
@@ -64,7 +61,6 @@ def get_filemanager():
             'status': 'error',
             'message': str(e)
         }), HTTPStatus.INTERNAL_SERVER_ERROR
-
 
 @filemanager_bp.route('/validate', methods=['POST'])
 def validate_name():

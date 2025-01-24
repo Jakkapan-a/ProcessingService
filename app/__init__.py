@@ -11,6 +11,7 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 from flask_cors import CORS
 
+from .services.model_loader import clean_model_cache
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -64,8 +65,19 @@ def create_app(config_class=Config):
     from app.routes import filemanager_bp, predict_bp
     app.register_blueprint(filemanager_bp, url_prefix='/api/v1/filemanager')
     app.register_blueprint(predict_bp, url_prefix='/api/v1/predict')
+
+    scheduler = BackgroundScheduler()
+    if not any(job.name == "clean_model_cache_job" for job in scheduler.get_jobs()):
+        scheduler.add_job(clean_model_cache, trigger='interval', hours=1, id='clean_model_cache_job')
+
+    scheduler.start()
+
     @app.get('/')
     def index():
+        return jsonify({'status': 'service is running'}), 200
+
+    @app.get('/api/v1')
+    def api_v1():
         return jsonify({'status': 'service is running'}), 200
 
     return app

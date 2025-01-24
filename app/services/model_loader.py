@@ -1,3 +1,5 @@
+# app/services/model_loader.py
+
 import os
 from ultralytics import YOLO
 from datetime import datetime, timedelta
