@@ -216,3 +216,22 @@ def delete_file():
             "status": "error",
             "message": str(e)
         }), HTTPStatus.INTERNAL_SERVER_ERROR
+
+
+@filemanager_bp.post('/clear-file')
+def clear():
+    """
+    Clear file
+    return:
+    """
+    try:
+        result, status_code = FileManagerService.clear_file()
+        if not result:
+            return jsonify({'status': 'error', 'message': 'Error in clear'}), HTTPStatus.NOT_FOUND
+        return jsonify({'status': 'success', 'message': 'Remove file success'}), HTTPStatus.OK
+    except Exception as e:
+        current_app.logger.error(f"Error in clear: {str(e)}")
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), HTTPStatus.INTERNAL_SERVER_ERROR

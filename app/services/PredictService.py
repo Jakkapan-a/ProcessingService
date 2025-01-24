@@ -5,7 +5,6 @@ from app.services.model_loader import get_model, clean_model_cache
 ALLOWED_EXTENSIONS = { 'jpg', 'png', 'pt'} # set of allowed file extensions
 
 class PredictService:
-
     """
     Check if the file extension is allowed
     @param filename: The name of the file
@@ -23,7 +22,6 @@ class PredictService:
         """
         # Load the image
         from app.models.filemanager import FileManager
-
         file_manager = FileManager.query.filter_by(id=_id).first()
 
         if not file_manager:

@@ -11,7 +11,7 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 from flask_cors import CORS
 
-from .services.model_loader import clean_model_cache
+from .services.model_loader import clean_model_cache, remove_model_not_db
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -69,9 +69,11 @@ def create_app(config_class=Config):
     scheduler = BackgroundScheduler()
     if not any(job.name == "clean_model_cache_job" for job in scheduler.get_jobs()):
         scheduler.add_job(clean_model_cache, trigger='interval', hours=1, id='clean_model_cache_job')
+        # scheduler.add_job(remove_model_not_db(10010), trigger='interval', seconds=10, id='remove_model_not_db')
 
     scheduler.start()
 
+    # Define the routes
     @app.get('/')
     def index():
         return jsonify({'status': 'service is running'}), 200

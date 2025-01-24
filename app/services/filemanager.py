@@ -357,3 +357,45 @@ class FileManagerService:
             current_app.logger.error(f"Error in delete: {str(e)}")
             raise Exception(f"Failed to delete file: {str(e)}")
 
+    @staticmethod
+    def clear_file():
+        """
+        Clear all files in models/cls and models/detect that are not in the database.
+        :return: Response dictionary and HTTP status code
+        """
+        def clear_directory(directory):
+            """
+            Helper function to clear files in a directory that are not in the database.
+            :param directory: Path to the directory
+            """
+            if not os.path.exists(directory):
+                current_app.logger.warning(f"Directory {directory} does not exist.")
+                return
+
+            files = os.listdir(directory)
+            for filename in files:
+                file_path = os.path.join(directory, filename)
+                exit_file = FileManager.query.filter_by(filename=filename).first()
+                if not exit_file:
+                    try:
+                        os.remove(file_path)
+                        current_app.logger.info(f"Removed: {filename}")
+                    except Exception as e:
+                        current_app.logger.error(f"Error deleting {filename}: {str(e)}")
+                else:
+                    current_app.logger.info(f"Keep: {filename}")
+
+        # Clear files in models/cls
+        cls_directory = os.path.join("models", "cls")
+        current_app.logger.info("Clearing files in models/cls")
+        clear_directory(cls_directory)
+
+        # Clear files in models/detect
+        detect_directory = os.path.join("models", "detect")
+        current_app.logger.info("Clearing files in models/detect")
+        clear_directory(detect_directory)
+
+        return {
+            'status': 'success',
+            'message': 'All files deleted successfully'
+        }, HTTPStatus.OK
