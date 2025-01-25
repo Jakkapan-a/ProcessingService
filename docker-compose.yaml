@@ -1,9 +1,9 @@
 services:
-  app_pss_yolo_service:
+  processing_image_service:
      build:
        context: .
        dockerfile: Dockerfile
-     container_name: app_pss_yolo_service
+     container_name: processing_image_service
      ports:
        - "10011:10011"
      volumes:
@@ -21,14 +21,14 @@ services:
        - THREADS=2
        - DEBUG=false
      depends_on:
-       - app_pss_yolo_db
-       - app_pss_yolo_pgadmin4
+       - processing_image_db
+       - processing_image_pgadmin4
 #     restart: always
 
-  app_pss_yolo_db:
+  processing_image_db:
       image: elestio/postgres:${SOFTWARE_VERSION_TAG}
       shm_size: 1g
-      container_name: app_pss_yolo_db
+      container_name: processing_image_db
       restart: always
       #command: -c ssl=on -c ssl_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem -c ssl_key_file=/etc/ssl/private/ssl-cert-snakeoil.key
       environment:
@@ -42,9 +42,9 @@ services:
       ports:
         - "6438:5432"
 
-  app_pss_yolo_pgadmin4:
+  processing_image_pgadmin4:
       image: elestio/pgadmin:latest
-      container_name: app_pss_yolo_pgadmin4
+      container_name: processing_image_pgadmin4
       restart: always
       environment:
         PGADMIN_DEFAULT_EMAIL: ${ADMIN_EMAIL}
