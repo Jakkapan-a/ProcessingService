@@ -53,11 +53,12 @@ WORKDIR /app
 
 COPY . ./
 
+
 ENV PYTHONPATH=/app
 
 # Change permissions for start.sh
 RUN chmod +x /app/start.sh
 
-EXPOSE 10010
+EXPOSE 10011
 
 CMD ["/app/start.sh"]
