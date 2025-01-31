@@ -11,7 +11,7 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 from flask_cors import CORS
 
-from .services.model_loader import clean_model_cache, remove_model_not_db
+from .services.model_loader import clean_model_cache
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -53,14 +53,6 @@ def create_app(config_class=Config):
         message = f'Handling request: {request.method} {request.url}'
         app.logger.info(message)
 
-        # try:
-        #     body = request.get_data(as_text=True)
-        #     if body:
-        #         app.logger.info(f'Body: {body}')
-        #
-        # except Exception as e:
-        #     app.logger.error(f'Error parsing JSON: {e}')
-
     # Import and register the blueprints
     from app.routes import filemanager_bp, predict_bp
     app.register_blueprint(filemanager_bp, url_prefix='/api/v1/filemanager')
@@ -69,7 +61,6 @@ def create_app(config_class=Config):
     scheduler = BackgroundScheduler()
     if not any(job.name == "clean_model_cache_job" for job in scheduler.get_jobs()):
         scheduler.add_job(clean_model_cache, trigger='interval', hours=1, id='clean_model_cache_job')
-        # scheduler.add_job(remove_model_not_db(10010), trigger='interval', seconds=10, id='remove_model_not_db')
 
     scheduler.start()
 
@@ -81,5 +72,10 @@ def create_app(config_class=Config):
     @app.get('/api/v1')
     def api_v1():
         return jsonify({'status': 'service is running'}), 200
+
+    @app.get('/api/v1/gpu')
+    def check_gpu():
+        from app.services.checkGPUService import check_gpu
+        return jsonify(check_gpu()), 200
 
     return app

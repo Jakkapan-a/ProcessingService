@@ -56,6 +56,13 @@ COPY . ./
 
 ENV PYTHONPATH=/app
 
+ENV NVIDIA_VISIBLE_DEVICES=all \
+    NVIDIA_DRIVER_CAPABILITIES=compute,utility \
+    CUDA_VISIBLE_DEVICES=all
+
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD nvidia-smi || exit 1
+
 # Change permissions for start.sh
 RUN chmod +x /app/start.sh
 

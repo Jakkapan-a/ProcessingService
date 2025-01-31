@@ -4,6 +4,14 @@ services:
        context: .
        dockerfile: Dockerfile
      container_name: processing_image_service
+     deploy:
+       resources:
+         reservations:
+           devices:
+             - driver: nvidia
+               count: all
+               capabilities: [gpu]
+
      ports:
        - "10011:10011"
      volumes:
@@ -20,10 +28,12 @@ services:
        - WORKERS=1
        - THREADS=2
        - DEBUG=false
+       - NVIDIA_VISIBLE_DEVICES=all
+       - NVIDIA_DRIVER_CAPABILITIES=compute,utility
      depends_on:
        - processing_image_db
        - processing_image_pgadmin4
-#     restart: always
+     restart: unless-stopped
 
   processing_image_db:
       image: elestio/postgres:${SOFTWARE_VERSION_TAG}
