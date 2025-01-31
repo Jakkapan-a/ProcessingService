@@ -4,6 +4,7 @@ services:
        context: .
        dockerfile: Dockerfile
      container_name: processing_image_service
+     runtime: nvidia
      deploy:
        resources:
          reservations:
