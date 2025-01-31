@@ -12,7 +12,7 @@ if torch.cuda.is_available():
     print('Device name:', torch.cuda.get_device_name(0))
 "
 
-#exec gunicorn --bind :${PORT:-10011} --workers ${WORKERS:-1} --threads ${THREADS:-4} --timeout 0 --worker-class gthread _server:app
+exec gunicorn --bind :${PORT:-10011} --workers ${WORKERS:-1} --threads ${THREADS:-4} --timeout 0 --worker-class gthread _server:app
 #exec gunicorn --bind :${PORT:-10011} \
 #    --workers ${WORKERS:-1} \
 #    --threads ${THREADS:-4} \
@@ -20,4 +20,4 @@ if torch.cuda.is_available():
 #    --worker-class gthread \
 #    _server:app
 
-python3 _server.py
+#python3 _server.py
