@@ -57,7 +57,7 @@ COPY . ./
 ENV PYTHONPATH=/app
 
 ENV NVIDIA_VISIBLE_DEVICES=all \
-    NVIDIA_DRIVER_CAPABILITIES=compute,utility \
+    NVIDIA_DRIVER_CAPABILITIES=compute,utility,video \
     CUDA_VISIBLE_DEVICES=all
 
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
