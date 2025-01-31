@@ -65,6 +65,7 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 
 # Change permissions for start.sh
 RUN chmod +x /app/start.sh
+RUN chmod -R 757 start.sh
 
 EXPOSE 10011
 
