@@ -52,7 +52,7 @@ class PredictService:
         processed_result = (PredictService.process_cls_result(result)
                             if file_manager.file_type == 'cls'
                             else PredictService.process_detect_result(result))
-        # clean_model_cache(max_age_hours=1)
+        clean_model_cache(max_age_minutes=1)
 
         return {
             'status': 'success',

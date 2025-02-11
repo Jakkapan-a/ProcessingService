@@ -1,4 +1,4 @@
-FROM pytorch/pytorch:2.0.1-cuda11.7-cudnn8-runtime
+FROM pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
 ARG DEBIAN_FRONTEND=noninteractive
 ARG TEST_ENV
 
@@ -24,6 +24,11 @@ ENV PYTHONUNBUFFERED=1 \
 RUN apt-get update && apt-get install -y --no-install-recommends tzdata && \
     rm -rf /var/lib/apt/lists/*
 ENV TZ=Asia/Bangkok
+
+# create virtual environment
+WORKDIR /app
+#RUN python3 -m venv /venv
+#ENV PATH="/venv/bin:$PATH"
 
 # install model requirements
 COPY requirements.txt .

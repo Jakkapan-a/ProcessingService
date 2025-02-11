@@ -397,7 +397,7 @@ class FileManagerService:
         detect_directory = os.path.join("models", "detect")
         current_app.logger.info("Clearing files in models/detect")
         clear_directory(detect_directory)
-        clean_model_cache(max_age_hours=1)
+        clean_model_cache(max_age_minutes=45)
         return {
             'status': 'success',
             'message': 'All files deleted successfully'
