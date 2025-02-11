@@ -1,34 +1,48 @@
-FROM pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
+FROM pytorch/pytorch:2.5.1-cuda12.4-cudnn9-runtime
 ARG DEBIAN_FRONTEND=noninteractive
 ARG TEST_ENV
 
 WORKDIR /app
 
+RUN conda update conda -y
+
 RUN --mount=type=cache,target="/var/cache/apt",sharing=locked \
     --mount=type=cache,target="/var/lib/apt/lists",sharing=locked \
-    apt-get update && apt-get install -y --no-install-recommends \
-    git wget g++ freeglut3-dev build-essential libx11-dev \
-    libxmu-dev libxi-dev libglu1-mesa libglu1-mesa-dev \
-    libfreeimage-dev ffmpeg libsm6 libxext6 libffi-dev python3-dev python3-pip gcc \
-    && rm -rf /var/lib/apt/lists/*
+    apt-get -y update \
+    && apt-get install -y git \
+    && apt-get install -y wget \
+    && apt-get install -y g++ freeglut3-dev build-essential libx11-dev \
+    libxmu-dev libxi-dev libglu1-mesa libglu1-mesa-dev libfreeimage-dev \
+    && apt-get -y install ffmpeg libsm6 libxext6 libffi-dev python3-dev python3-pip gcc
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_CACHE_DIR=/.cache \
-    PORT=10011 \
+    PORT=10010 \
     WORKERS=1 \
     THREADS=2 \
     CUDA_HOME=/usr/local/cuda \
     DEBUG=false
 
-RUN apt-get update && apt-get install -y --no-install-recommends tzdata && \
+# Install Python, pip, and required build dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    python3 python3-pip python3-venv python3-distutils build-essential \
+    libgl1 libglib2.0-0 libsm6 libxext6 libxrender1 && \
     rm -rf /var/lib/apt/lists/*
-ENV TZ=Asia/Bangkok
 
-# create virtual environment
-WORKDIR /app
-#RUN python3 -m venv /venv
-#ENV PATH="/venv/bin:$PATH"
+#
+#RUN conda install -c "nvidia/label/cuda-12.4" cuda -y
+#ENV CUDA_HOME=/opt/conda \
+#    TORCH_CUDA_ARCH_LIST="6.0;6.1;7.0;7.5;8.0;8.6+PTX;8.9;9.0"
+
+# Install timezone data
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends tzdata && \
+    rm -rf /var/lib/apt/lists/*
+
+# Set the timezone to Thailand (Asia/Bangkok)
+ENV TZ=Asia/Bangkok
 
 # install model requirements
 COPY requirements.txt .
@@ -48,22 +62,7 @@ ENV NVIDIA_VISIBLE_DEVICES=all \
 
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD nvidia-smi || exit 1
-#
-#RUN if command -v nvidia-smi > /dev/null; then \
-#        echo "✅ GPU detected: Using CUDA"; \
-#        echo "ENV CUDA_VISIBLE_DEVICES=all" >> /etc/environment; \
-#        echo "ENV NVIDIA_VISIBLE_DEVICES=all" >> /etc/environment; \
-#    else \
-#        echo "⚠️ No GPU found: Running on CPU"; \
-#        echo "ENV CUDA_VISIBLE_DEVICES=" >> /etc/environment; \
-#        echo "ENV NVIDIA_VISIBLE_DEVICES=" >> /etc/environment; \
-#    fi
-#
-## Use a conditional healthcheck that supports both CPU & GPU
-#HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-#    CMD sh -c "if command -v nvidia-smi > /dev/null; then nvidia-smi; else echo 'No GPU found, running on CPU'; fi"
-#
-#
+
 # Change permissions for start.sh
 RUN chmod +x /app/start.sh
 
