@@ -1,50 +1,50 @@
 services:
-#  processing_image_service:
-#     build:
-#       context: .
-#       dockerfile: Dockerfile
-#     container_name: processing_image_service
-#     runtime: nvidia # use nvidia runtime for GPU support
-#     deploy:
-#       resources:
-#         reservations:
-#           devices:
-#             - driver: nvidia
-#               count: all
-#               capabilities: [gpu]
-#     ports:
-#       - "10011:10011"
-#     volumes:
-#       - ./models:/app/models
-#       - ./cache_dir:/app/cache_dir
-#       - .:/app
-#     environment:
-#       - PORT=10011
-#       # set the log level for the model server
-#       - LOG_LEVEL=INFO
-#       # any other parameters that you want to pass to the model server
-#       - ANY=PARAMETER
-#       # specify the number of workers and threads for the model server
-#       - WORKERS=1
-#       - THREADS=2
-#       - DEBUG=false
-#       - NVIDIA_VISIBLE_DEVICES=all
-#       - NVIDIA_DRIVER_CAPABILITIES=all
-#       - CUDA_VISIBLE_DEVICES=all
-#       - PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:128
-#       - OMP_NUM_THREADS=$(nproc)
-#       - CUDA_LAUNCH_BLOCKING=0
-#       - USE_CPU_IF_NO_GPU=true # if no GPU is available, use CPU
-#     healthcheck:
-#       test: [ "CMD", "python3", "-c", "import torch; assert torch.cuda.is_available()" ]
-#       interval: 30s
-#       timeout: 10s
-#       retries: 3
-#
-#     depends_on:
-#       - processing_image_db
-#       - processing_image_pgadmin4
-#     restart: unless-stopped
+  processing_image_service:
+     build:
+       context: .
+       dockerfile: Dockerfile
+     container_name: processing_image_service
+     runtime: nvidia # use nvidia runtime for GPU support
+     deploy:
+       resources:
+         reservations:
+           devices:
+             - driver: nvidia
+               count: all
+               capabilities: [gpu]
+     ports:
+       - "10011:10011"
+     volumes:
+       - ./models:/app/models
+       - ./cache_dir:/app/cache_dir
+       - .:/app
+     environment:
+       - PORT=10011
+       # set the log level for the model server
+       - LOG_LEVEL=INFO
+       # any other parameters that you want to pass to the model server
+       - ANY=PARAMETER
+       # specify the number of workers and threads for the model server
+       - WORKERS=1
+       - THREADS=2
+       - DEBUG=false
+       - NVIDIA_VISIBLE_DEVICES=all
+       - NVIDIA_DRIVER_CAPABILITIES=all
+       - CUDA_VISIBLE_DEVICES=all
+       - PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:128
+       - OMP_NUM_THREADS=$(nproc)
+       - CUDA_LAUNCH_BLOCKING=0
+       - USE_CPU_IF_NO_GPU=true # if no GPU is available, use CPU
+     healthcheck:
+       test: [ "CMD", "python3", "-c", "import torch; assert torch.cuda.is_available()" ]
+       interval: 30s
+       timeout: 10s
+       retries: 3
+
+     depends_on:
+       - processing_image_db
+       - processing_image_pgadmin4
+     restart: unless-stopped
 
   processing_image_db:
       image: elestio/postgres:${SOFTWARE_VERSION_TAG}
