@@ -1,4 +1,4 @@
-FROM pytorch/pytorch:2.5.1-cuda12.4-cudnn9-runtime
+FROM pytorch/pytorch:2.0.1-cuda11.7-cudnn8-runtime
 ARG DEBIAN_FRONTEND=noninteractive
 ARG TEST_ENV
 
