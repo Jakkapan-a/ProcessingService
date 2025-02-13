@@ -7,7 +7,7 @@ User=p3admin
 Group=p3admin
 WorkingDirectory=/home/p3admin/ProcessingService
 Environment="PATH=/home/p3admin/ProcessingService/venv/bin"
-ExecStart=/home/p3admin/ProcessingService/venv/bin/gunicorn --workers 4 --bind 0.0.0.0:10011 _server:app
+ExecStart=/home/p3admin/ProcessingService/venv/bin/gunicorn --workers 1 --bind 0.0.0.0:10011 _server:app
 MemoryMax=10G
 Restart=always
 RestartSec=5

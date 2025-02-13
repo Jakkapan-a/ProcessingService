@@ -1,5 +1,8 @@
 # app/services/PredictService.py
 from http import HTTPStatus
+
+import torch
+
 from app.services.model_loader import get_model, clean_model_cache
 
 ALLOWED_EXTENSIONS = { 'jpg', 'png', 'pt'} # set of allowed file extensions
@@ -47,7 +50,14 @@ class PredictService:
                 'message': 'Model not found'
             }, HTTPStatus.NOT_FOUND
 
-        result = model.predict(image)
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # Predict the
+        with torch.no_grad():
+            result = model.predict(image)
+
+        # Clean the model cache
+        if device.type == 'cuda':
+            torch.cuda.empty_cache()
 
         processed_result = (PredictService.process_cls_result(result)
                             if file_manager.file_type == 'cls'

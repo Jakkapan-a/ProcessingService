@@ -25,7 +25,7 @@ services:
        # any other parameters that you want to pass to the model server
        - ANY=PARAMETER
        # specify the number of workers and threads for the model server
-       - WORKERS=8
+       - WORKERS=1
        - THREADS=2
        - DEBUG=false
        - NVIDIA_VISIBLE_DEVICES=all
