@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 
 model_cache = {}
 model_access_time = {}
+clean_model_time = datetime.now()
 
 def check_gpu():
     """Check GPU availability and return device"""
@@ -20,6 +21,15 @@ def check_gpu():
 def clean_model_cache(max_age_minutes=45):
     current_time = datetime.now()
     print(f"Running clean_model_cache at {current_time}")
+
+    # check clean_model_time to avoid cleaning cache too frequently
+    global clean_model_time
+    if current_time - clean_model_time < timedelta(minutes=5): # 5 minutes
+        print("Skipping cache cleanup as it was recently cleaned.")
+        print(f"Time since last cleanup: {current_time - clean_model_time}")
+        return
+
+    clean_model_time = current_time # Update clean_model_time
 
     to_delete = []
     for model_name, access_time in model_access_time.items():
@@ -56,33 +66,4 @@ def get_model(model_name, model_folder,model_id):
     model_cache[model_id] = model # Store model in cache
     model_access_time[model_id] = datetime.now()  # Set access time
     return model
-
-# def remove_model_not_db():
-#     """
-#     Remove model that not in cache and db
-#     :return:
-#     """
-#     # Get all in folder
-#     list_cls = os.listdir("models/cls")
-#     list_detect = os.listdir("models/detect")
-#
-#     print('list_cls')
-#     # endpoint = /api/v1/filemanager/:filename/validate
-#     # url = 'http://localhost:'+port.__str__()+'/api/v1/filemanager'
-#     for key in list_cls:
-#         exit_file = 0
-#         if not exit_file:
-#             print('remove :',key)
-#             os.remove(f"models/cls/{key}")
-#             list_cls.remove(key)
-#
-#
-#     print('list_detect')
-#     for key in list_detect:
-#         # exit_file = FileManager.query.filter_by(filename=key).first()
-#         exit_file = 0 # FileManager.query.filter_by(filename=key).first()
-#         if not exit_file:
-#             print('remove :',key)
-#             os.remove(f"models/detect/{key}")
-#             list_detect.remove(key)
 
