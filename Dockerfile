@@ -32,9 +32,9 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 
-RUN conda install -c "nvidia/label/cuda-12.4" cuda -y
-ENV CUDA_HOME=/opt/conda \
-    TORCH_CUDA_ARCH_LIST="6.0;6.1;7.0;7.5;8.0;8.6+PTX;8.9;9.0"
+#RUN conda install -c "nvidia/label/cuda-12.4" cuda -y
+#ENV CUDA_HOME=/opt/conda \
+#    TORCH_CUDA_ARCH_LIST="6.0;6.1;7.0;7.5;8.0;8.6+PTX;8.9;9.0"
 
 # Install timezone data
 RUN apt-get update && \
