@@ -22,7 +22,7 @@ services:
       - THREADS=2
       - DEBUG=false
     depends_on:
-      - processing_image_pgadmin4
+#      - processing_image_pgadmin4
       - processing_image_db
 
   processing_image_db:
