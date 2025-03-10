@@ -4,6 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: processing_image_service
+    restart: unless-stopped
 #    runtime: nvidia
     ports:
       - "10011:10011"
