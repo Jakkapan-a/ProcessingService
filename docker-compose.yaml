@@ -27,7 +27,7 @@ services:
       - processing_image_db
 
   processing_image_db:
-      image: elestio/postgres:${SOFTWARE_VERSION_TAG}
+      image: postgres:17
       shm_size: 1g
       container_name: processing_image_db
       restart: always
