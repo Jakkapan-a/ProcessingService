@@ -1,0 +1,51 @@
+services:
+  processing_image_service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: processing_image_service
+    restart: unless-stopped
+#    runtime: nvidia
+    ports:
+      - "10011:10011"
+    volumes:
+      - ./models:/app/models
+      - ./cache_dir:/app/cache_dir
+      - .:/app
+    environment:
+      - PORT=10011
+      # set the log level for the model server
+      - LOG_LEVEL=DEBUG
+      # any other parameters that you want to pass to the model server
+      - ANY=PARAMETER
+      # specify the number of workers and threads for the model server
+      - WORKERS=1
+      - THREADS=2
+      - DEBUG=false
+      # GPU settings
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+    # runtime: nvidia
+    depends_on:
+#      - processing_image_pgadmin4
+      - processing_image_db
+
+  processing_image_db:
+      image: postgres:17
+      shm_size: 1g
+      container_name: processing_image_db
+      restart: always
+      #command: -c ssl=on -c ssl_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem -c ssl_key_file=/etc/ssl/private/ssl-cert-snakeoil.key
+      environment:
+        POSTGRES_DB: postgres
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+        PGDATA: /var/lib/postgresql/data
+        TS_TUNE_MAX_CONNS: 100
+      volumes:
+        - ./data:/var/lib/postgresql/data
+      ports:
+        - "6438:5432"
