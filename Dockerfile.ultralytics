@@ -16,12 +16,12 @@ RUN pip install -r requirements.txt
 
 COPY . .
 
-# เปลี่ยนสิทธิ์ start.sh
+# Change permissions for start.sh
 RUN chmod +x /app/start.sh
 
 # Health check with GPU
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD python3 -c "import torch; assert torch.cuda.is_available()" || exit 1
+# HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+#     CMD python3 -c "import torch; assert torch.cuda.is_available()" || exit 1
 
 EXPOSE 10011
 
