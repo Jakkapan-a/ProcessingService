@@ -51,6 +51,12 @@ class PredictService:
             }, HTTPStatus.NOT_FOUND
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        model.info()
+
+        print("Model loaded successfully on device:", device)
+
+        
         # Predict the
         with torch.no_grad():
             result = model.predict(image)
