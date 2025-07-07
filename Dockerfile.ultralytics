@@ -21,15 +21,13 @@ RUN apt-get update && \
     ffmpeg libsm6 libxext6 libffi-dev python3-dev python3-pip gcc && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip install --pre torch torchvision torchaudio \
-  --index-url https://download.pytorch.org/whl/nightly/cu128 \
-  --upgrade --force-reinstall
-
-
 # Install additional dependencies if needed
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
+RUN pip install --pre torch torchvision torchaudio \
+  --index-url https://download.pytorch.org/whl/nightly/cu128 \
+  --upgrade --force-reinstall
 COPY . .
 
 # Change permissions for start.sh
