@@ -24,6 +24,8 @@ services:
       - DEBUG=false
       # GPU settings
       - TORCH_USE_CUDA_DSA=1
+      - CUDA_LAUNCH_BLOCKING=1
+      - NVIDIA_VISIBLE_DEVICES=all
     deploy:
       resources:
         reservations:
