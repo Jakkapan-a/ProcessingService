@@ -71,6 +71,8 @@ class PredictService:
 
         clean_model_cache(max_age_minutes=45)
 
+        # Return the result
+        print("======= End of Prediction Result =======")
         return {
             'status': 'success',
             'type': file_manager.file_type,
