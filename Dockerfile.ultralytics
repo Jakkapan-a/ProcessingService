@@ -1,4 +1,5 @@
-FROM ultralytics/ultralytics:latest
+# FROM ultralytics/ultralytics:latest
+FROM pytorch/pytorch:2.7.0-cuda12.8-cudnn9-runtime
 
 WORKDIR /app
 
@@ -8,7 +9,9 @@ ENV PYTHONUNBUFFERED=1 \
     WORKERS=1 \
     THREADS=2 \
     DEBUG=false \
-    TZ=Asia/Bangkok
+    TZ=Asia/Bangkok \
+    TORCH_USE_CUDA_DSA=1 \
+    CUDA_LAUNCH_BLOCKING=1
 
 # Install additional dependencies if needed
 COPY requirements.txt .

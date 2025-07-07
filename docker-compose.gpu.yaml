@@ -29,7 +29,6 @@ services:
         reservations:
           devices:
             - capabilities: [gpu]
-    # runtime: nvidia
     depends_on:
 #      - processing_image_pgadmin4
       - processing_image_db
