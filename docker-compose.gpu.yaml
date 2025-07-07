@@ -23,6 +23,7 @@ services:
       - THREADS=2
       - DEBUG=false
       # GPU settings
+      - TORCH_USE_CUDA_DSA=1
     deploy:
       resources:
         reservations:
