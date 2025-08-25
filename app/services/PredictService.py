@@ -51,6 +51,12 @@ class PredictService:
             }, HTTPStatus.NOT_FOUND
 
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        model.info()
+
+        print("Model loaded successfully on device:", device)
+
+        
         # Predict the
         with torch.no_grad():
             result = model.predict(image)
@@ -62,8 +68,10 @@ class PredictService:
         processed_result = (PredictService.process_cls_result(result)
                             if file_manager.file_type == 'cls'
                             else PredictService.process_detect_result(result))
-        clean_model_cache(max_age_minutes=45)
+        clean_model_cache(max_age_minutes=1)
 
+        # Return the result
+        print("======= End of Prediction Result =======")
         return {
             'status': 'success',
             'type': file_manager.file_type,
